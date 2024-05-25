@@ -1,6 +1,6 @@
 import { FC, ReactElement } from 'react';
 
-import { IButtonProps } from '../shared.inteface';
+import { IButtonProps } from '../shared.interface';
 
 const Button: FC<IButtonProps> = (props): ReactElement => {
   const { id, label, className, disabled, role, type, testId, onClick } = props;
