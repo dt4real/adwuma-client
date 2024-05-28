@@ -1,7 +1,7 @@
 import { FC, lazy, LazyExoticComponent, ReactElement, useState } from 'react';
 import { Link } from 'react-router-dom';
-import LoginModal from 'src/features/auth/Login';
-import RegisterModal from 'src/features/auth/Register';
+import LoginModal from 'src/features/auth/components/Login';
+import RegisterModal from 'src/features/auth/components/Register';
 import { IButtonProps } from 'src/shared/shared.interface';
 
 import { IHeader, IHeaderModalProps } from '../interfaces/header.interface';
