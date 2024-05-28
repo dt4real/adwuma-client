@@ -168,7 +168,7 @@ const RegisterModal: FC<IModalBgProps> = ({ onClose, onToggle }): ReactElement =
               className={`text-md block w-full cursor-pointer rounded bg-sky-500 px-8 py-2 text-center font-bold text-white hover:bg-sky-400 focus:outline-none ${
                 !userInfo.country || !userInfo.profilePicture ? 'cursor-not-allowed' : 'cursor-pointer'
               }`}
-              label='SIGNUP'
+              label="SIGNUP"
               onClick={() => {
                 console.log('Hi');
               }}

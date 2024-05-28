@@ -1,10 +1,10 @@
 import { FC, lazy, LazyExoticComponent, ReactElement, useState } from 'react';
 import { Link } from 'react-router-dom';
 import LoginModal from 'src/features/auth/Login';
+import RegisterModal from 'src/features/auth/Register';
 import { IButtonProps } from 'src/shared/shared.interface';
 
 import { IHeader, IHeaderModalProps } from '../interfaces/header.interface';
-import RegisterModal from 'src/features/auth/Register';
 
 const Button: LazyExoticComponent<FC<IButtonProps>> = lazy(() => import('src/shared/button/Button'));
 
