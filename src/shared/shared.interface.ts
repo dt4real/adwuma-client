@@ -1,4 +1,27 @@
+import { SerializedError } from '@reduxjs/toolkit';
+import { FetchBaseQueryError } from '@reduxjs/toolkit/query';
 import { ChangeEvent, CSSProperties, Dispatch, KeyboardEvent, ReactNode, SetStateAction } from 'react';
+import { IAuthDocument, IAuthResponse, IResetPassword, ISignInPayload, ISignUpPayload } from 'src/features/auth/interfaces/auth.interface';
+
+export type validationErrorsType = ISignInPayload | ISignUpPayload | IResetPassword;
+
+export interface IQueryResponse {
+  data: IAuthResponse;
+  error: FetchBaseQueryError | SerializedError;
+}
+
+export interface IResponse {
+  message?: string;
+  token?: string;
+  user?: IAuthDocument;
+  total?: number;
+  sortItems?: string[];
+  conversationId?: string;
+  clientSecret?: string;
+  paymentIntentId?: string;
+  browserName?: string;
+  deviceType?: string;
+}
 
 export interface IBannerProps {
   bgColor: string;
