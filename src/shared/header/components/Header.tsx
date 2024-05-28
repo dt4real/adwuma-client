@@ -4,6 +4,7 @@ import LoginModal from 'src/features/auth/Login';
 import { IButtonProps } from 'src/shared/shared.interface';
 
 import { IHeader, IHeaderModalProps } from '../interfaces/header.interface';
+import RegisterModal from 'src/features/auth/Register';
 
 const Button: LazyExoticComponent<FC<IButtonProps>> = lazy(() => import('src/shared/button/Button'));
 
@@ -21,6 +22,12 @@ const Header: FC<IHeader> = ({ navClass }): ReactElement => {
           onClose={() => setShowModal((items: IHeaderModalProps) => ({ ...items, login: false }))}
           onToggle={() => setShowModal((items: IHeaderModalProps) => ({ ...items, login: false, register: true }))}
           onTogglePassword={() => setShowModal((items: IHeaderModalProps) => ({ ...items, login: false, forgotPassword: true }))}
+        />
+      )}
+      {showModal.register && (
+        <RegisterModal
+          onClose={() => setShowModal((item: IHeaderModalProps) => ({ ...item, register: false }))}
+          onToggle={() => setShowModal((item: IHeaderModalProps) => ({ ...item, login: true, register: false }))}
         />
       )}
       <header>

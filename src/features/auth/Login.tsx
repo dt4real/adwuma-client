@@ -101,14 +101,7 @@ const LoginModal: FC<IModalBgProps> = ({ onClose, onToggle, onTogglePassword }):
           <div className="ml-2 flex w-full justify-center text-sm font-medium">
             <div className="flex justify-center">
               Not yet a memeber?{' '}
-              <p
-                onClick={() => {
-                  if (onToggle) {
-                    onToggle(true);
-                  }
-                }}
-                className="ml-2 flex cursor-pointer text-blue-600 hover:underline"
-              >
+              <p onClick={() => onToggle && onToggle(true)} className="ml-2 flex cursor-pointer text-blue-600 hover:underline">
                 Join Now
               </p>
             </div>
