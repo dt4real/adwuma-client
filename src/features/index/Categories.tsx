@@ -25,7 +25,7 @@ const Categories: FC = (): ReactElement => {
         </div>
         <div className="flex flex-wrap gap-x-2 gap-y-4 py-1 sm:hidden">
           {categories.map((category: ICategory) => (
-            <div className="cursor-pointer text-black border border-black rounded-3xl w-auto p-2 hover:bg-[#f7f9fa]">
+            <div key={uuidv4()} className="cursor-pointer text-black border border-black rounded-3xl w-auto p-2 hover:bg-[#f7f9fa]">
               <h3 className="mb-1 text-xs font-bold ">{category.name}</h3>
             </div>
           ))}

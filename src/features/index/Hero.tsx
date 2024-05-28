@@ -27,7 +27,8 @@ const Hero: FC = (): ReactElement => {
       startDelay: 300,
       typeSpeed: 120,
       backSpeed: 200,
-      backDelay: 300
+      backDelay: 300,
+      loop: true
     });
 
     return () => {
