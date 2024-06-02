@@ -1,20 +1,33 @@
-import { ChangeEvent, FC, ReactElement, useState } from 'react';
+import { ChangeEvent, FC, ReactElement, useRef, useState } from 'react';
 import { useDeviceData, useMobileOrientation } from 'react-device-detect';
-import { FaChevronLeft, FaEye, FaEyeSlash, FaTimes } from 'react-icons/fa';
+import { FaCamera, FaChevronLeft, FaEye, FaEyeSlash, FaTimes } from 'react-icons/fa';
+import Alert from 'src/shared/alert/Alert';
 import Button from 'src/shared/button/Button';
 import Dropdown from 'src/shared/dropdown/Dropdown';
 import TextInput from 'src/shared/inputs/TextInput';
 import { IModalBgProps } from 'src/shared/modals/interfaces/modal.interface';
 import ModalBg from 'src/shared/modals/ModalBg';
-import { countriesList } from 'src/shared/utils/utils.service';
+import { IResponse } from 'src/shared/shared.interface';
+import { checkImage, readAsBase64 } from 'src/shared/utils/image-utils.service';
+import { countriesList, saveToSessionStorage } from 'src/shared/utils/utils.service';
+import { useAppDispatch } from 'src/store/store';
+
+import { useAuthSchema } from '../hooks/useAuthSchema';
+import { ISignUpPayload } from '../interfaces/auth.interface';
+import { addAuthUser } from '../reducers/auth.reducer';
+import { registerUserSchema } from '../schemes/auth.schema';
+import { useSignUpMutation } from '../services/auth.service';
 
 const RegisterModal: FC<IModalBgProps> = ({ onClose, onToggle }): ReactElement => {
   const mobileOrientation = useMobileOrientation();
   const deviceData = useDeviceData(window.navigator.userAgent);
   const [step, setStep] = useState<number>(1);
+  const [alertMessage, setAlertMessage] = useState<string>('');
   const [country, setCountry] = useState<string>('Select Country');
   const [passwordType, setPasswordType] = useState<string>('password');
-  const [userInfo, setUserInfo] = useState({
+  const [profileImage, setProfileImage] = useState<string>('https://placehold.co/330x220?text=Profile+Image');
+  const [showImageSelect, setShowImageSelect] = useState<boolean>(false);
+  const [userInfo, setUserInfo] = useState<ISignUpPayload>({
     username: '',
     password: '',
     email: '',
@@ -23,6 +36,45 @@ const RegisterModal: FC<IModalBgProps> = ({ onClose, onToggle }): ReactElement =
     browserName: deviceData.browser.name,
     deviceType: mobileOrientation.isLandscape ? 'browser' : 'mobile'
   });
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const dispatch = useAppDispatch();
+  const [schemaValidation, validationErrors] = useAuthSchema({ schema: registerUserSchema, userInfo });
+  const [signUp, { isLoading }] = useSignUpMutation();
+
+  const handleFileChange = async (event: ChangeEvent): Promise<void> => {
+    const target: HTMLInputElement = event.target as HTMLInputElement;
+    if (target.files) {
+      const file: File = target.files[0];
+      const isValid = checkImage(file, 'image');
+      if (isValid) {
+        const dataImage: string | ArrayBuffer | null = await readAsBase64(file);
+        setProfileImage(`${dataImage}`);
+        setUserInfo({ ...userInfo, profilePicture: `${dataImage}` });
+      }
+      setShowImageSelect(false);
+    }
+  };
+
+  const onRegisterUser = async (): Promise<void> => {
+    try {
+      const valid = await schemaValidation();
+      console.log(valid);
+      if (valid) {
+        const result: IResponse = await signUp(userInfo).unwrap();
+        setAlertMessage('');
+        dispatch(addAuthUser({ authInfo: result.user }));
+        saveToSessionStorage(JSON.stringify(true), JSON.stringify(result.user?.username));
+      } else {
+        validationErrors.find((err) => {
+          if (err.path === 'username' || err.path === 'email' || err.path === 'password') {
+            setStep(1);
+          }
+        });
+      }
+    } catch (error) {
+      setAlertMessage(error?.data === undefined ? 'Sorry, an error occured' : error?.data.message);
+    }
+  };
 
   return (
     <ModalBg>
@@ -64,11 +116,11 @@ const RegisterModal: FC<IModalBgProps> = ({ onClose, onToggle }): ReactElement =
             </li>
           </ol>
         </div>
-        <div className="px-5"></div>
+        <div className="px-5">{alertMessage && <Alert type="error" message={alertMessage} />}</div>
 
         {step === 1 && (
           <div className="relative px-5 py-5">
-            <div>
+            <div className="mb-5">
               <label htmlFor="username" className="text-sm font-bold leading-tight tracking-normal text-gray-800">
                 Username
               </label>
@@ -77,14 +129,17 @@ const RegisterModal: FC<IModalBgProps> = ({ onClose, onToggle }): ReactElement =
                 name="username"
                 type="text"
                 value={userInfo.username}
-                className="mb-5 mt-2 flex h-10 w-full items-center rounded border border-gray-300 pl-3 text-sm font-normal text-gray-600 focus:border focus:border-sky-500/50 focus:outline-none"
+                className={`mt-2 flex h-10 w-full items-center rounded border pl-3 text-sm font-normal text-gray-600 focus:border focus:border-sky-500/50 focus:outline-none ${validationErrors.find((err) => err.path === 'username') ? 'border-red-500' : 'border-gray-300'}`}
                 placeholder="Enter username"
                 onChange={(event: ChangeEvent) => {
                   setUserInfo({ ...userInfo, username: (event.target as HTMLInputElement).value });
                 }}
               />
+              {validationErrors.find((err) => err.path === 'username') && (
+                <div className="text-red-500 text-sm">{validationErrors.find((err) => err.path === 'username')?.message}</div>
+              )}
             </div>
-            <div>
+            <div className="mb-5">
               <label htmlFor="email" className="text-sm font-bold leading-tight tracking-normal text-gray-800">
                 Email
               </label>
@@ -93,18 +148,21 @@ const RegisterModal: FC<IModalBgProps> = ({ onClose, onToggle }): ReactElement =
                 name="email"
                 type="email"
                 value={userInfo.email}
-                className="mb-5 mt-2 flex h-10 w-full items-center rounded border border-gray-300 pl-3 text-sm font-normal text-gray-600 focus:border focus:border-sky-500/50 focus:outline-none"
+                className={`mt-2 flex h-10 w-full items-center rounded border pl-3 text-sm font-normal text-gray-600 focus:border focus:border-sky-500/50 focus:outline-none ${validationErrors.find((err) => err.path === 'email') ? 'border-red-500' : 'border-gray-300'}`}
                 placeholder="Enter email"
                 onChange={(event: ChangeEvent) => {
                   setUserInfo({ ...userInfo, email: (event.target as HTMLInputElement).value });
                 }}
               />
+              {validationErrors.find((err) => err.path === 'email') && (
+                <div className="text-red-500 text-sm">{validationErrors.find((err) => err.path === 'email')?.message}</div>
+              )}
             </div>
-            <div>
+            <div className="mb-5">
               <label htmlFor="password" className="text-sm font-bold leading-tight tracking-normal text-gray-800">
                 Password
               </label>
-              <div className="relative mb-5 mt-2">
+              <div className="relative mt-2">
                 <div className="absolute right-0 flex h-full cursor-pointer items-center pr-3 text-gray-600">
                   {passwordType === 'password' ? (
                     <FaEyeSlash onClick={() => setPasswordType('text')} className="icon icon-tabler icon-tabler-info-circle" />
@@ -117,13 +175,16 @@ const RegisterModal: FC<IModalBgProps> = ({ onClose, onToggle }): ReactElement =
                   name="password"
                   type={passwordType}
                   value={userInfo.password}
-                  className="flex h-10 w-full items-center rounded border border-gray-300 pl-3 text-sm font-normal text-gray-600 focus:border focus:border-sky-500/50 focus:outline-none"
+                  className={`flex h-10 w-full items-center rounded border pl-3 text-sm font-normal text-gray-600 focus:border focus:border-sky-500/50 focus:outline-none ${validationErrors.find((err) => err.path === 'password') ? 'border-red-500' : 'border-gray-300'}`}
                   placeholder="Enter password"
                   onChange={(event: ChangeEvent) => {
                     setUserInfo({ ...userInfo, password: (event.target as HTMLInputElement).value });
                   }}
                 />
               </div>
+              {validationErrors.find((err) => err.path === 'password') && (
+                <div className="text-red-500 text-sm">{validationErrors.find((err) => err.path === 'password')?.message}</div>
+              )}
             </div>
             <Button
               disabled={!userInfo.username || !userInfo.email || !userInfo.password}
@@ -161,17 +222,51 @@ const RegisterModal: FC<IModalBgProps> = ({ onClose, onToggle }): ReactElement =
               <label htmlFor="profilePicture" className="text-sm font-bold leading-tight tracking-normal text-gray-800">
                 Profile Picture
               </label>
-              <div className="relative mb-5 mt-2 w-[20%] cursor-pointer"></div>
+              <div
+                onMouseEnter={() => setShowImageSelect(true)}
+                onMouseLeave={() => setShowImageSelect(false)}
+                className="relative mb-5 mt-2 w-[20%] cursor-pointer"
+              >
+                {profileImage && (
+                  <img
+                    id="profilePicture"
+                    src={profileImage}
+                    alt="Profile Picture"
+                    className="left-0 top-0 h-20 w-20 rounded-full bg-white object-cover"
+                  />
+                )}
+                {!profileImage && (
+                  <div className="left-0 top-0 flex h-20 w-20 cursor-pointer justify-center rounded-full bg-[#dee1e7]"></div>
+                )}
+                {showImageSelect && (
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className="absolute left-0 top-0 flex h-20 w-20 cursor-pointer justify-center rounded-full bg-[#dee1e7]"
+                  >
+                    <FaCamera className="flex self-center" />
+                  </div>
+                )}
+                <TextInput
+                  name="image"
+                  ref={fileInputRef}
+                  type="file"
+                  style={{ display: 'none' }}
+                  onClick={() => {
+                    if (fileInputRef.current) {
+                      fileInputRef.current.value = '';
+                    }
+                  }}
+                  onChange={handleFileChange}
+                />
+              </div>
             </div>
             <Button
               disabled={!userInfo.country || !userInfo.profilePicture}
               className={`text-md block w-full cursor-pointer rounded bg-sky-500 px-8 py-2 text-center font-bold text-white hover:bg-sky-400 focus:outline-none ${
                 !userInfo.country || !userInfo.profilePicture ? 'cursor-not-allowed' : 'cursor-pointer'
               }`}
-              label="SIGNUP"
-              onClick={() => {
-                console.log('Hi');
-              }}
+              label={`${isLoading ? 'SIGNUP IN PROGRESS...' : 'SIGNUP'}`}
+              onClick={onRegisterUser}
             />
           </div>
         )}

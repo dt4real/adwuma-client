@@ -1,5 +1,6 @@
 import { FC, lazy, LazyExoticComponent, ReactElement, useState } from 'react';
 import { Link } from 'react-router-dom';
+import ForgotPasswordModal from 'src/features/auth/components/ForgotPassword';
 import LoginModal from 'src/features/auth/components/Login';
 import RegisterModal from 'src/features/auth/components/Register';
 import { IButtonProps } from 'src/shared/shared.interface';
@@ -19,15 +20,21 @@ const Header: FC<IHeader> = ({ navClass }): ReactElement => {
     <>
       {showModal.login && (
         <LoginModal
-          onClose={() => setShowModal((items: IHeaderModalProps) => ({ ...items, login: false }))}
-          onToggle={() => setShowModal((items: IHeaderModalProps) => ({ ...items, login: false, register: true }))}
-          onTogglePassword={() => setShowModal((items: IHeaderModalProps) => ({ ...items, login: false, forgotPassword: true }))}
+          onClose={() => setShowModal((item: IHeaderModalProps) => ({ ...item, login: false }))}
+          onToggle={() => setShowModal((item: IHeaderModalProps) => ({ ...item, login: false, register: true }))}
+          onTogglePassword={() => setShowModal((item: IHeaderModalProps) => ({ ...item, login: false, forgotPassword: true }))}
         />
       )}
       {showModal.register && (
         <RegisterModal
           onClose={() => setShowModal((item: IHeaderModalProps) => ({ ...item, register: false }))}
           onToggle={() => setShowModal((item: IHeaderModalProps) => ({ ...item, login: true, register: false }))}
+        />
+      )}
+      {showModal.forgotPassword && (
+        <ForgotPasswordModal
+          onClose={() => setShowModal((item: IHeaderModalProps) => ({ ...item, forgotPassword: false }))}
+          onToggle={() => setShowModal((item: IHeaderModalProps) => ({ ...item, login: true, forgotPassword: false }))}
         />
       )}
       <header>
