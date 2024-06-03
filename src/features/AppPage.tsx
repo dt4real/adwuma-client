@@ -1,14 +1,14 @@
 import { FC, ReactElement, useCallback, useEffect, useState } from 'react';
-
-import Index from './index/Index';
+import { NavigateFunction, useNavigate } from 'react-router-dom';
+import HomeHeader from 'src/shared/header/components/HomeHeader';
+import { applicationLogout, saveToSessionStorage } from 'src/shared/utils/utils.service';
 import { useAppDispatch, useAppSelector } from 'src/store/store';
 import { IReduxState } from 'src/store/store.interface';
-import { useCheckCurrentUserQuery } from './auth/services/auth.service';
+
 import { addAuthUser } from './auth/reducers/auth.reducer';
-import { applicationLogout, saveToSessionStorage } from 'src/shared/utils/utils.service';
-import HomeHeader from 'src/shared/header/components/HomeHeader';
+import { useCheckCurrentUserQuery } from './auth/services/auth.service';
 import Home from './home/Home';
-import { NavigateFunction, useNavigate } from 'react-router-dom';
+import Index from './index/Index';
 
 const AppPage: FC = (): ReactElement => {
   const authUser = useAppSelector((state: IReduxState) => state.authUser);
