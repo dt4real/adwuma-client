@@ -1,13 +1,14 @@
 import { FC, ReactElement, useCallback, useEffect, useState } from 'react';
-import HomeHeader from 'src/shared/header/components/HomeHeader';
-import { saveToSessionStorage } from 'src/shared/utils/utils.service';
+
+import Index from './index/Index';
 import { useAppDispatch, useAppSelector } from 'src/store/store';
 import { IReduxState } from 'src/store/store.interface';
-
-import { addAuthUser } from './auth/reducers/auth.reducer';
 import { useCheckCurrentUserQuery } from './auth/services/auth.service';
+import { addAuthUser } from './auth/reducers/auth.reducer';
+import { applicationLogout, saveToSessionStorage } from 'src/shared/utils/utils.service';
+import HomeHeader from 'src/shared/header/components/HomeHeader';
 import Home from './home/Home';
-import Index from './index/Index';
+import { NavigateFunction, useNavigate } from 'react-router-dom';
 
 const AppPage: FC = (): ReactElement => {
   const authUser = useAppSelector((state: IReduxState) => state.authUser);
@@ -15,6 +16,7 @@ const AppPage: FC = (): ReactElement => {
   const showCategoryContainer = true;
   const [tokenIsValid, setTokenIsValid] = useState<boolean>(false);
   const dispatch = useAppDispatch();
+  const navigate: NavigateFunction = useNavigate();
   const { data: currentUserData, isError } = useCheckCurrentUserQuery(undefined, { skip: authUser.id === null });
 
   const checkUser = useCallback(async () => {
@@ -32,8 +34,9 @@ const AppPage: FC = (): ReactElement => {
   const logoutUser = useCallback(async () => {
     if ((!currentUserData && appLogout) || isError) {
       setTokenIsValid(false);
+      applicationLogout(dispatch, navigate);
     }
-  }, [currentUserData, appLogout, isError]);
+  }, [currentUserData, dispatch, navigate, appLogout, isError]);
 
   useEffect(() => {
     checkUser();
