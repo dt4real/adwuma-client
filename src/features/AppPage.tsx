@@ -9,6 +9,8 @@ import { addAuthUser } from './auth/reducers/auth.reducer';
 import { useCheckCurrentUserQuery } from './auth/services/auth.service';
 import Home from './home/components/Home';
 import Index from './index/Index';
+import { useGetCurrentBuyerByUsernameQuery } from './buyer/services/buyer.service';
+import { addBuyer } from './buyer/reducers/buyer.reducer';
 
 const AppPage: FC = (): ReactElement => {
   const authUser = useAppSelector((state: IReduxState) => state.authUser);
@@ -18,18 +20,20 @@ const AppPage: FC = (): ReactElement => {
   const dispatch = useAppDispatch();
   const navigate: NavigateFunction = useNavigate();
   const { data: currentUserData, isError } = useCheckCurrentUserQuery(undefined, { skip: authUser.id === null });
+  const { data: buyerData } = useGetCurrentBuyerByUsernameQuery(undefined, { skip: authUser.id === null });
 
   const checkUser = useCallback(async () => {
     try {
       if (currentUserData && currentUserData.user && !appLogout) {
         setTokenIsValid(true);
         dispatch(addAuthUser({ authInfo: currentUserData.user }));
+        dispatch(addBuyer(buyerData?.buyer));
         saveToSessionStorage(JSON.stringify(true), JSON.stringify(authUser.username));
       }
     } catch (error) {
       console.log(error);
     }
-  }, [appLogout, authUser.username, currentUserData, dispatch]);
+  }, [appLogout, authUser.username, buyerData?.buyer, currentUserData, dispatch]);
 
   const logoutUser = useCallback(async () => {
     if ((!currentUserData && appLogout) || isError) {

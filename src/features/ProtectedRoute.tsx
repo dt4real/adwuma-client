@@ -16,6 +16,7 @@ const ProtectedRoute: FC<IProtectedRouteProps> = ({ children }): ReactElement =>
   const authUser = useAppSelector((state: IReduxState) => state.authUser);
   const showCategoryContainer = useAppSelector((state: IReduxState) => state.showCategoryContainer);
   const header = useAppSelector((state: IReduxState) => state.header);
+  console.log(header);
   const [tokenIsValid, setTokenIsValid] = useState<boolean>(false);
   const dispatch = useAppDispatch();
   const navigate: NavigateFunction = useNavigate();

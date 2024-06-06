@@ -1,14 +1,21 @@
-import { FC, Suspense } from 'react';
+import { ReactNode, Suspense } from 'react';
 import { RouteObject, useRoutes } from 'react-router-dom';
 
 import AppPage from './features/AppPage';
 import ConfirmEmail from './features/auth/components/ConfirmEmail';
 import ResetPassword from './features/auth/components/ResetPassword';
+import BuyerDashboard from './features/buyer/components/Dashboard';
+import Error from './features/error/Error';
 import Home from './features/home/components/Home';
 import ProtectedRoute from './features/ProtectedRoute';
-import Error from './features/error/Error';
 
-const AppRouter: FC = () => {
+const Layout = ({ backgroundColor = '#fff', children }: { backgroundColor: string; children: ReactNode }): JSX.Element => (
+  <div style={{ backgroundColor }} className="flex flex-grow">
+    {children}
+  </div>
+);
+
+const AppRouter = () => {
   const routes: RouteObject[] = [
     {
       path: 'reset_password',
@@ -35,7 +42,21 @@ const AppRouter: FC = () => {
       element: (
         <Suspense>
           <ProtectedRoute>
-            <Home />
+            <Layout backgroundColor="#ffffff">
+              <Home />
+            </Layout>
+          </ProtectedRoute>
+        </Suspense>
+      )
+    },
+    {
+      path: '/users/:username/:buyerId/orders',
+      element: (
+        <Suspense>
+          <ProtectedRoute>
+            <Layout backgroundColor="#ffffff">
+              <BuyerDashboard />
+            </Layout>
           </ProtectedRoute>
         </Suspense>
       )

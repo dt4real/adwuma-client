@@ -7,6 +7,9 @@ import storage from 'redux-persist/lib/storage';
 import authReducer from 'src/features/auth/reducers/auth.reducer';
 
 import { api } from './api';
+import headerReducer from 'src/shared/header/reducers/header.reducer';
+import logoutReducer from 'src/features/auth/reducers/logout.reducer';
+import buyerReducer from 'src/features/buyer/reducers/buyer.reducer';
 
 const persistConfig = {
   key: 'root',
@@ -16,7 +19,10 @@ const persistConfig = {
 
 export const combineReducer = combineReducers({
   [api.reducerPath]: api.reducer,
-  authUser: authReducer
+  authUser: authReducer,
+  logout: logoutReducer,
+  buyer: buyerReducer,
+  header: headerReducer
 });
 
 export const rootReducers: Reducer<RootState> = (state, action) => {
