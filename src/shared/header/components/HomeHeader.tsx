@@ -2,15 +2,19 @@ import { Transition } from '@headlessui/react';
 import { FC, ReactElement, useRef } from 'react';
 import { FaAngleLeft, FaAngleRight, FaBars, FaRegBell, FaRegEnvelope } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
+import { addAuthUser } from 'src/features/auth/reducers/auth.reducer';
+import { useResendEmailMutation } from 'src/features/auth/services/auth.service';
+import Banner from 'src/shared/banner/Banner';
 import Button from 'src/shared/button/Button';
-import { categories, replaceSpacesWithDash } from 'src/shared/utils/utils.service';
-import { useAppSelector } from 'src/store/store';
+import { IResponse } from 'src/shared/shared.interface';
+import { categories, replaceSpacesWithDash, showErrorToast, showSuccessToast } from 'src/shared/utils/utils.service';
+import { useAppDispatch, useAppSelector } from 'src/store/store';
 import { IReduxState } from 'src/store/store.interface';
 import { v4 as uuidv4 } from 'uuid';
 
 import { IHomeHeaderProps } from '../interfaces/header.interface';
 
-const HomeHeader: FC<IHomeHeaderProps> = (): ReactElement => {
+const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactElement => {
   const authUser = useAppSelector((state: IReduxState) => state.authUser);
 
   const settingsDropdownRef = useRef<HTMLDivElement | null>(null);
@@ -19,16 +23,39 @@ const HomeHeader: FC<IHomeHeaderProps> = (): ReactElement => {
   const orderDropdownRef = useRef<HTMLDivElement | null>(null);
   const navElement = useRef<HTMLDivElement | null>(null);
 
+  const dispatch = useAppDispatch();
+  const [resendEmail] = useResendEmailMutation();
+
   const isSettingsDropdown = false;
   const isMessageDropdownOpen = false;
   const isNotificationDropdownOpen = false;
   const isOrderDropdownOpen = false;
 
+  const onResendEmail = async (): Promise<void> => {
+    try {
+      const result: IResponse = await resendEmail({ userId: authUser.id as number, email: `${authUser.email}` }).unwrap();
+      dispatch(addAuthUser({ authInfo: result.user }));
+      showSuccessToast('Email sent successfully.');
+    } catch (error) {
+      showErrorToast('Error sending email.');
+    }
+  };
+
   return (
     <>
       <header>
         <nav className="navbar peer-checked:navbar-active relative z-[120] w-full border-b bg-white shadow-2xl shadow-gray-600/5 backdrop-blur dark:shadow-none">
-          {/* <!-- Add Banner component here --> */}
+
+          {authUser && !authUser.emailVerified && (
+            <Banner
+              bgColor="bg-warning"
+              showLink={true}
+              linkText="Resend email"
+              text="Please verify your email before you proceed."
+              onClick={onResendEmail}
+            />
+          )}
+
           <div className="m-auto px-6 xl:container md:px-12 lg:px-6">
             <div className="flex flex-wrap items-center justify-between gap-6 md:gap-0 md:py-3 lg:py-5">
               <div className="flex w-full gap-x-4 lg:w-6/12">
@@ -51,7 +78,7 @@ const HomeHeader: FC<IHomeHeaderProps> = (): ReactElement => {
                 </div>
                 {/* <!-- Add MobileHeaderSearchInput component here --> */}
               </div>
-              <div className="navmenu mb-16 hidden w-full cursor-pointer flex-wrap items-center justify-end space-y-8 rounded-3xl border border-gray-100 bg-white p-6 shadow-2xl shadow-gray-300/20 dark:border-gray-700 dark:bg-gray-800 dark:shadow-none md:flex-nowrap lg:m-0 lg:flex lg:w-6/12 lg:space-y-0 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none">
+              <div className="navmenu mb-16 hidden w-full cursor-pointer flex-wrap items-center justify-end space-y-8 rounded-3xl border border-gray-100 bg-white p-6 shadow-2xl md:flex-nowrap lg:m-0 lg:flex lg:w-6/12 lg:space-y-0 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none">
                 <div className="text-[#74767e] lg:pr-4">
                   <ul className="flex text-base font-medium">
                     <li className="relative z-50 flex cursor-pointer items-center">
@@ -135,7 +162,7 @@ const HomeHeader: FC<IHomeHeaderProps> = (): ReactElement => {
                         className="relative flex gap-2 px-3 text-base font-medium"
                         label={
                           <>
-                            <img src="" alt="profile" className="h-7 w-7 rounded-full object-cover" />
+                            <img src={`${authUser.profilePicture}`} alt="profile" className="h-7 w-7 rounded-full object-cover" />
                             <span className="flex self-center">{authUser.username}</span>
                           </>
                         }
@@ -159,26 +186,28 @@ const HomeHeader: FC<IHomeHeaderProps> = (): ReactElement => {
             </div>
           </div>
 
-          <div className="border-grey z-40 hidden w-full border border-x-0 border-b-0 sm:flex">
-            <div className="justify-left md:justify-left container mx-auto flex px-6 lg:justify-center">
-              <span className="flex w-auto cursor-pointer self-center pr-1 xl:hidden">
-                <FaAngleLeft size={20} />
-              </span>
-              <div
-                ref={navElement}
-                className="relative inline-block h-full w-full items-center gap-6 overflow-x-auto scroll-smooth whitespace-nowrap py-2 text-sm font-medium lg:flex lg:justify-between"
-              >
-                {categories().map((category: string) => (
-                  <span key={uuidv4()} className="mx-4 cursor-pointer first:ml-0 hover:text-sky-400 lg:mx-0">
-                    <Link to={`/categories/${replaceSpacesWithDash(category)}`}>{category}</Link>
-                  </span>
-                ))}
+          {showCategoryContainer && (
+            <div className="border-grey z-40 hidden w-full border border-x-0 border-b-0 sm:flex">
+              <div className="justify-left md:justify-left container mx-auto flex px-6 lg:justify-center">
+                <span className="flex w-auto cursor-pointer self-center pr-1 xl:hidden">
+                  <FaAngleLeft size={20} />
+                </span>
+                <div
+                  ref={navElement}
+                  className="relative inline-block h-full w-full items-center gap-6 overflow-x-auto scroll-smooth whitespace-nowrap py-2 text-sm font-medium lg:flex lg:justify-between"
+                >
+                  {categories().map((category: string) => (
+                    <span key={uuidv4()} className="mx-4 cursor-pointer first:ml-0 hover:text-sky-400 lg:mx-0">
+                      <Link to={`/categories/${replaceSpacesWithDash(category)}`}>{category}</Link>
+                    </span>
+                  ))}
+                </div>
+                <span className="flex w-auto cursor-pointer self-center pl-1 xl:hidden">
+                  <FaAngleRight size={20} />
+                </span>
               </div>
-              <span className="flex w-auto cursor-pointer self-center pl-1 xl:hidden">
-                <FaAngleRight size={20} />
-              </span>
             </div>
-          </div>
+          )}
         </nav>
       </header>
     </>

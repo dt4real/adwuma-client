@@ -5,6 +5,7 @@ import AppPage from './features/AppPage';
 import ConfirmEmail from './features/auth/components/ConfirmEmail';
 import ResetPassword from './features/auth/components/ResetPassword';
 import Home from './features/home/Home';
+import ProtectedRoute from './features/ProtectedRoute';
 
 const AppRouter: FC = () => {
   const routes: RouteObject[] = [
@@ -30,7 +31,13 @@ const AppRouter: FC = () => {
     },
     {
       path: '/',
-      element: <Home />
+      element: (
+        <Suspense>
+          <ProtectedRoute>
+            <Home />
+          </ProtectedRoute>
+        </Suspense>
+      )
     }
   ];
 
