@@ -45,7 +45,6 @@ const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactEleme
     <>
       <header>
         <nav className="navbar peer-checked:navbar-active relative z-[120] w-full border-b bg-white shadow-2xl shadow-gray-600/5 backdrop-blur dark:shadow-none">
-
           {authUser && !authUser.emailVerified && (
             <Banner
               bgColor="bg-warning"
@@ -71,7 +70,7 @@ const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactEleme
                       to="/"
                       className="relative z-10 flex cursor-pointer justify-center self-center text-2xl font-semibold text-black lg:text-3xl"
                     >
-                      Jobber
+                      Adwuma
                     </Link>
                     {/* <!-- Add HeaderSearchInput component --> */}
                   </div>
