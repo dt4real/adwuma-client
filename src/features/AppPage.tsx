@@ -7,10 +7,10 @@ import { IReduxState } from 'src/store/store.interface';
 
 import { addAuthUser } from './auth/reducers/auth.reducer';
 import { useCheckCurrentUserQuery } from './auth/services/auth.service';
+import { addBuyer } from './buyer/reducers/buyer.reducer';
+import { useGetCurrentBuyerByUsernameQuery } from './buyer/services/buyer.service';
 import Home from './home/components/Home';
 import Index from './index/Index';
-import { useGetCurrentBuyerByUsernameQuery } from './buyer/services/buyer.service';
-import { addBuyer } from './buyer/reducers/buyer.reducer';
 
 const AppPage: FC = (): ReactElement => {
   const authUser = useAppSelector((state: IReduxState) => state.authUser);

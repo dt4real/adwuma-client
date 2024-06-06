@@ -4,8 +4,10 @@ import { FaAngleLeft, FaAngleRight, FaBars, FaRegBell, FaRegEnvelope } from 'rea
 import { Link } from 'react-router-dom';
 import { addAuthUser } from 'src/features/auth/reducers/auth.reducer';
 import { useResendEmailMutation } from 'src/features/auth/services/auth.service';
+import { ISellerDocument } from 'src/features/sellers/interfaces/seller.interface';
 import Banner from 'src/shared/banner/Banner';
 import Button from 'src/shared/button/Button';
+import useDetectOutsideClick from 'src/shared/hooks/useDetectOutsideClick';
 import { IResponse } from 'src/shared/shared.interface';
 import { categories, replaceSpacesWithDash, showErrorToast, showSuccessToast } from 'src/shared/utils/utils.service';
 import { useAppDispatch, useAppSelector } from 'src/store/store';
@@ -13,9 +15,11 @@ import { IReduxState } from 'src/store/store.interface';
 import { v4 as uuidv4 } from 'uuid';
 
 import { IHomeHeaderProps } from '../interfaces/header.interface';
+import SettingsDropdown from './SettingsDropdown';
 
 const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactElement => {
   const authUser = useAppSelector((state: IReduxState) => state.authUser);
+  const buyer = useAppSelector((state: IReduxState) => state.buyer);
 
   const settingsDropdownRef = useRef<HTMLDivElement | null>(null);
   const messageDropdownRef = useRef<HTMLDivElement | null>(null);
@@ -26,7 +30,7 @@ const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactEleme
   const dispatch = useAppDispatch();
   const [resendEmail] = useResendEmailMutation();
 
-  const isSettingsDropdown = false;
+  const [isSettingsDropdown, setIsSettingsDropdown] = useDetectOutsideClick(settingsDropdownRef, false);
   const isMessageDropdownOpen = false;
   const isNotificationDropdownOpen = false;
   const isOrderDropdownOpen = false;
@@ -39,6 +43,10 @@ const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactEleme
     } catch (error) {
       showErrorToast('Error sending email.');
     }
+  };
+
+  const toggleDropdown = (): void => {
+    setIsSettingsDropdown(!isSettingsDropdown);
   };
 
   return (
@@ -159,6 +167,7 @@ const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactEleme
                     <li className="relative z-50 flex cursor-pointer items-center">
                       <Button
                         className="relative flex gap-2 px-3 text-base font-medium"
+                        onClick={toggleDropdown}
                         label={
                           <>
                             <img src={`${authUser.profilePicture}`} alt="profile" className="h-7 w-7 rounded-full object-cover" />
@@ -176,7 +185,15 @@ const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactEleme
                         leaveFrom="opacity-100 translate-y-0"
                         leaveTo="opacity-0 translate-y-1"
                       >
-                        <div className="absolute -right-48 z-50 mt-5 w-96">{/* <!-- SettingsDropdown --> */}</div>
+                        <div className="absolute -right-60 z-50 mt-5 w-96">
+                          <SettingsDropdown
+                            seller={{} as ISellerDocument}
+                            buyer={buyer}
+                            authUser={authUser}
+                            type="buyer"
+                            setIsDropdownOpen={setIsSettingsDropdown}
+                          />
+                        </div>
                       </Transition>
                     </li>
                   </ul>

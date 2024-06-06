@@ -5,11 +5,11 @@ import { Reducer } from 'redux';
 import { FLUSH, PAUSE, PERSIST, persistReducer, PURGE, REGISTER, REHYDRATE } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 import authReducer from 'src/features/auth/reducers/auth.reducer';
-
-import { api } from './api';
-import headerReducer from 'src/shared/header/reducers/header.reducer';
 import logoutReducer from 'src/features/auth/reducers/logout.reducer';
 import buyerReducer from 'src/features/buyer/reducers/buyer.reducer';
+import headerReducer from 'src/shared/header/reducers/header.reducer';
+
+import { api } from './api';
 
 const persistConfig = {
   key: 'root',
