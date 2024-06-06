@@ -4,6 +4,7 @@ import { lowerCase } from 'src/shared/utils/utils.service';
 import { v4 as uuidv4 } from 'uuid';
 
 import { IFeaturedExpertProps } from '../interfaces/home.interface';
+import StarRating from 'src/shared/rating/StarRating';
 
 const FeaturedExperts: FC<IFeaturedExpertProps> = ({ sellers }): ReactElement => {
   return (
@@ -25,7 +26,9 @@ const FeaturedExperts: FC<IFeaturedExpertProps> = ({ sellers }): ReactElement =>
                 <h5 className="mb-1 xl:text-xl font-medium text-gray-900 ">Danny</h5>
                 <span className="text-sm w-[90%] mb-1 text-gray-500 text-center dark:text-gray-500">This is what i do</span>
                 <div className="flex justify-center w-full gap-x-1 self-center h-6">
-                  <div className="mt-1 w-20 gap-x-2">{/* <!-- Star rating component --> */}</div>
+                  <div className="mt-1 w-20 gap-x-2">
+                    <StarRating value={5} size={14} />
+                  </div>
                   <div className="ml-2 flex self-center gap-1 rounded bg-orange-400 px-1 text-xs">
                     <span className="font-bold text-white">5</span>
                   </div>

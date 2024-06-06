@@ -6,6 +6,7 @@ import ConfirmEmail from './features/auth/components/ConfirmEmail';
 import ResetPassword from './features/auth/components/ResetPassword';
 import Home from './features/home/components/Home';
 import ProtectedRoute from './features/ProtectedRoute';
+import Error from './features/error/Error';
 
 const AppRouter: FC = () => {
   const routes: RouteObject[] = [
@@ -36,6 +37,14 @@ const AppRouter: FC = () => {
           <ProtectedRoute>
             <Home />
           </ProtectedRoute>
+        </Suspense>
+      )
+    },
+    {
+      path: '*',
+      element: (
+        <Suspense>
+          <Error />
         </Suspense>
       )
     }
